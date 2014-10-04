@@ -55,11 +55,26 @@ function fix_utf8_truncation(s)
 
 {
 	debug=1
-# 删除前面的 <div class="list"><a href="/wap/view_333623.htm">
-tmp=substr($0,50);
+# 删除前面的 div 元素 <div class="list">
+tmp=substr($0,19);
 
-i=index(tmp,"<")-1;
-tmp=substr(tmp, 1, 32);
+# 继续删除前面的 a 元素 <a href="/wap/view_333623.htm">
+left=index(tmp,">");
+tmp=substr(tmp, left+1);
+
+# 如果第一个字符是 [ 则删除之，原因： 我的 android 手机 (Huawei U8800) 不能显示名称的首字符是 [ 的 SSID (如：[图]xxxxxx )
+while (substr(tmp,1,1)=="[")
+{
+	#print tmp > "/dev/stderr";
+	tmp=substr(tmp,2);
+}
+
+# 删除后面的 a 元素闭合
+right=index(tmp,"<")-1;
+if (right > 32)
+	tmp=substr(tmp, 1, 32);
+else
+	tmp=substr(tmp, 1, right-1);
 if (debug) print "[" tmp "]" > "/dev/stderr";
 
 tmp=fix_utf8_truncation(tmp);
